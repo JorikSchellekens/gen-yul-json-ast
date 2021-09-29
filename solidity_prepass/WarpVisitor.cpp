@@ -9,6 +9,20 @@
 #include "WarpVisitor.hpp"
 #include "yul_prepass/Prepass.hpp"
 
+void removeNonIdents(std::string& s)
+{
+	boost::replace_all(s, "{", " ");
+	boost::replace_all(s, "}", "");
+	boost::replace_all(s, "(", " ");
+	boost::replace_all(s, ")", "");
+	boost::replace_all(s, ",", " ");
+	boost::replace_all(s, ".", " ");
+	boost::replace_all(s, "[", " ");
+	boost::replace_all(s, "]", " ");
+	boost::replace_all(s, "/", " ");
+	boost::replace_all(s, "*", " ");
+}
+
 SourceData::SourceData(std::string main_contract,
 					   std::string src,
 					   std::string filepath)
@@ -31,17 +45,17 @@ void SourceData::removeComments()
 			newSplit.emplace_back(m_srcSplit[i]);
 			continue;
 		}
-		else if(boost::starts_with(lineCopy, "//"))
+		else if (boost::starts_with(lineCopy, "//"))
 		{
+			newSplit.emplace_back("");
 			continue;
-		}	
+		}
 		else
 		{
 			newSplit.emplace_back(m_srcSplit[i]);
 		}
-	}	
+	}
 	this->m_srcSplit = newSplit;
-	print_vector(m_srcSplit);
 }
 
 bool SourceData::hasDynamicArgs(std::string params)
@@ -157,7 +171,7 @@ CommandLineInterface SourceData::getCli(char const* sol_filepath)
 }
 
 void SourceData::markAddressTypesInFunArgs(FunctionDefinition const& _node,
-									  std::string				funcFull)
+										   std::string				 funcFull)
 {
 	auto funcFullReplaced = funcFull;
 	for (auto param: _node.parameters())
@@ -357,8 +371,30 @@ bool SourceData::visit(Identifier const& _node)
 		}
 		return visitNode(_node);
 	}
-	default:
+	case PassType::AddrTypePass:
+	{
+		if (_node.annotation().type != nullptr)
+		{
+			auto cat = _node.annotation().type->category();
+			switch (cat)
+			{
+			case Type::Category::Address:
+			{
+				auto name = std::string(m_src.begin() + _node.location().start,
+										m_src.begin() + _node.location().end);
+				auto markedName = name + "_addr_t";
+				break;
+			}
+			default:
+				return visitNode(_node);
+			}
+		}
 		return visitNode(_node);
+	}
+	default:
+	{
+		return visitNode(_node);
+	}
 	}
 }
 
@@ -508,7 +544,7 @@ void SourceData::addressTypePass()
 							 .definedFunctions();
 	m_currentPass = PassType::AddrTypePass;
 	m_compiler->ast(m_modifiedSolFilepath).accept(*this);
-	for (auto fun : m_addrMarkedFuncs)
+	for (auto fun: m_addrMarkedFuncs)
 	{
 		boost::replace_all(m_src, fun.first, fun.second);
 	}
@@ -521,7 +557,7 @@ void SourceData::prepareSoliditySource(const char* sol_filepath)
 {
 	this->dynFuncArgsPass(sol_filepath);
 	this->addressTypePass();
-	this->storageVarPass();
+	// this->storageVarPass();
 	auto newCli		   = getCli(m_modifiedSolFilepath.c_str());
 	auto paths		   = newCli.options().input.paths;
 	this->m_fileReader = std::move(newCli.fileReader());
@@ -551,9 +587,9 @@ void SourceData::prepareSoliditySource(const char* sol_filepath)
 	// auto yul	 = prepass.cleanYul(yulIROptimized, m_mainContract);
 	// std::cout << yul << std::endl;
 	// // =============== Generate Yul JSON AST ===============
-	// langutil::CharStream ir = langutil::CharStream(yul, m_modifiedSolFilepath);
-	// std::variant<phaser::Program, langutil::ErrorList>
-	// 	maybeProgram = phaser::Program::load(ir);
+	// langutil::CharStream ir = langutil::CharStream(yul,
+	// m_modifiedSolFilepath); std::variant<phaser::Program,
+	// langutil::ErrorList> 	maybeProgram = phaser::Program::load(ir);
 
 	// if (auto* errorList = std::get_if<langutil::ErrorList>(&maybeProgram))
 	// {

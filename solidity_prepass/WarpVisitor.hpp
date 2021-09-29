@@ -13,6 +13,7 @@
 
 using namespace solidity::frontend;
 using namespace solidity;
+
 struct PublicFunctions
 {
 	std::vector<std::string> names;

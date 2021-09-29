@@ -1,14 +1,26 @@
+
 pragma solidity >=0.7.6;
 pragma abicoder v2;
 
+
+
 library SafeCast {
+
+
+
     function toUint160(uint256 y) internal pure returns (uint160 z) {
         require((z = uint160(y)) == y);
     }
 
+
+
+
     function toInt128(int256 y) internal pure returns (int128 z) {
         require((z = int128(y)) == y);
     }
+
+
+
 
     function toInt256(uint256 y) internal pure returns (int256 z) {
         require(y < 2**255);
@@ -16,12 +28,24 @@ library SafeCast {
     }
 }
 
+
+
+
 library TickMath {
+
     int24 internal constant MIN_TICK = -887272;
+
     int24 internal constant MAX_TICK = -MIN_TICK;
 
+
     uint160 internal constant MIN_SQRT_RATIO = 4295128739;
+
     uint160 internal constant MAX_SQRT_RATIO = 1461446703485210103287273052203988822378723970342;
+
+
+
+
+
 
     function getSqrtRatioAtTick(int24 tick) internal pure returns (uint160 sqrtPriceX96) {
         uint256 absTick = tick < 0 ? uint256(-int256(tick)) : uint256(int256(tick));
@@ -50,10 +74,19 @@ library TickMath {
 
         if (tick > 0) ratio = type(uint256).max / ratio;
 
+
+
+
         sqrtPriceX96 = uint160((ratio >> 32) + (ratio % (1 << 32) == 0 ? 0 : 1));
     }
 
+
+
+
+
+
     function getTickAtSqrtRatio(uint160 sqrtPriceX96) internal pure returns (int24 tick) {
+
         require(sqrtPriceX96 >= MIN_SQRT_RATIO && sqrtPriceX96 < MAX_SQRT_RATIO, 'R');
         uint256 ratio = uint256(sqrtPriceX96) << 32;
 
@@ -199,21 +232,57 @@ library TickMath {
 }
 
 
+
+
 interface IUniswapV3PoolImmutables {
+
+
     function factory() external view returns (address);
+
+
 
     function token0() external view returns (address);
 
+
+
     function token1() external view returns (address);
+
+
 
     function fee() external view returns (uint24);
 
+
+
+
+
+
     function tickSpacing() external view returns (int24);
+
+
+
+
 
     function maxLiquidityPerTick() external view returns (uint128);
 }
 
+
+
+
 interface IUniswapV3PoolState {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     function slot0()
         external
@@ -228,13 +297,35 @@ interface IUniswapV3PoolState {
             bool unlocked
         );
 
+
+
     function feeGrowthGlobal0X128() external view returns (uint256);
+
+
 
     function feeGrowthGlobal1X128() external view returns (uint256);
 
+
+
     function protocolFees() external view returns (uint128 token0, uint128 token1);
 
+
+
     function liquidity() external view returns (uint128);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     function ticks(int24 tick)
         external
@@ -250,7 +341,15 @@ interface IUniswapV3PoolState {
             bool initialized
         );
 
+
     function tickBitmap(int16 wordPosition) external view returns (uint256);
+
+
+
+
+
+
+
 
     function positions(bytes32 key)
         external
@@ -263,6 +362,14 @@ interface IUniswapV3PoolState {
             uint128 tokensOwed1
         );
 
+
+
+
+
+
+
+
+
     function observations(uint256 index)
         external
         view
@@ -274,12 +381,35 @@ interface IUniswapV3PoolState {
         );
 }
 
+
+
+
 interface IUniswapV3PoolDerivedState {
+
+
+
+
+
+
+
+
+
+
+
 
     function observe(uint32[] calldata secondsAgos)
         external
         view
         returns (int56[] memory tickCumulatives, uint160[] memory secondsPerLiquidityCumulativeX128s);
+
+
+
+
+
+
+
+
+
 
     function snapshotCumulativesInside(int24 tickLower, int24 tickUpper)
         external
@@ -291,25 +421,62 @@ interface IUniswapV3PoolDerivedState {
         );
 }
 
+
+
 interface IUniswapV3PoolActions {
+
+
+
+
 
     function initialize(uint160 sqrtPriceX96) external;
 
+
+
+
+
+
+
+
+
+
+
+
     function mint(
-        address recipient,
+        address recipient_addr_t,
         int24 tickLower,
         int24 tickUpper,
         uint128 amount,
         bytes calldata data
     ) external returns (uint256 amount0, uint256 amount1);
 
+
+
+
+
+
+
+
+
+
+
+
+
     function collect(
-        address recipient,
+        address recipient_addr_t,
         int24 tickLower,
         int24 tickUpper,
         uint128 amount0Requested,
         uint128 amount1Requested
     ) external returns (uint128 amount0, uint128 amount1);
+
+
+
+
+
+
+
+
 
     function burn(
         int24 tickLower,
@@ -317,39 +484,88 @@ interface IUniswapV3PoolActions {
         uint128 amount
     ) external returns (uint256 amount0, uint256 amount1);
 
+
+
+
+
+
+
+
+
+
+
     function swap(
-        address recipient,
+        address recipient_addr_t,
         bool zeroForOne,
         int256 amountSpecified,
         uint160 sqrtPriceLimitX96,
         bytes calldata data
     ) external returns (int256 amount0, int256 amount1);
 
+
+
+
+
+
+
+
+
     function flash(
-        address recipient,
+        address recipient_addr_t,
         uint256 amount0,
         uint256 amount1,
         bytes calldata data
     ) external;
 
+
+
+
+
     function increaseObservationCardinalityNext(uint16 observationCardinalityNext) external;
 }
 
+
+
 interface IUniswapV3PoolOwnerActions {
+
+
+
+
 
     function setFeeProtocol(uint8 feeProtocol0, uint8 feeProtocol1) external;
 
+
+
+
+
+
+
     function collectProtocol(
-        address recipient,
+        address recipient_addr_t,
         uint128 amount0Requested,
         uint128 amount1Requested
     ) external returns (uint128 amount0, uint128 amount1);
 }
 
 
+
+
 interface IUniswapV3PoolEvents {
 
+
+
+
+
+
     event Initialize(uint160 sqrtPriceX96, int24 tick);
+
+
+
+
+
+
+
+
 
     event Mint(
         address sender,
@@ -361,6 +577,13 @@ interface IUniswapV3PoolEvents {
         uint256 amount1
     );
 
+
+
+
+
+
+
+
     event Collect(
         address indexed owner,
         address recipient,
@@ -370,6 +593,14 @@ interface IUniswapV3PoolEvents {
         uint128 amount1
     );
 
+
+
+
+
+
+
+
+
     event Burn(
         address indexed owner,
         int24 indexed tickLower,
@@ -378,6 +609,14 @@ interface IUniswapV3PoolEvents {
         uint256 amount0,
         uint256 amount1
     );
+
+
+
+
+
+
+
+
 
     event Swap(
         address indexed sender,
@@ -389,6 +628,13 @@ interface IUniswapV3PoolEvents {
         int24 tick
     );
 
+
+
+
+
+
+
+
     event Flash(
         address indexed sender,
         address indexed recipient,
@@ -398,15 +644,34 @@ interface IUniswapV3PoolEvents {
         uint256 paid1
     );
 
+
+
+
+
+
     event IncreaseObservationCardinalityNext(
         uint16 observationCardinalityNextOld,
         uint16 observationCardinalityNextNew
     );
 
+
+
+
+
+
     event SetFeeProtocol(uint8 feeProtocol0Old, uint8 feeProtocol1Old, uint8 feeProtocol0New, uint8 feeProtocol1New);
+
+
+
+
+
 
     event CollectProtocol(address indexed sender, address indexed recipient, uint128 amount0, uint128 amount1);
 }
+
+
+
+
 interface IUniswapV3Pool is
     IUniswapV3PoolImmutables,
     IUniswapV3PoolState,
@@ -420,7 +685,18 @@ interface IUniswapV3Pool is
 
 
 
+
+
 interface IUniswapV3SwapCallback {
+
+
+
+
+
+
+
+
+
     function uniswapV3SwapCallback(
         int256 amount0Delta,
         int256 amount1Delta,
@@ -428,7 +704,10 @@ interface IUniswapV3SwapCallback {
     ) external;
 }
 
+
+
 interface ISwapRouter is IUniswapV3SwapCallback {
+
 
     struct ExactInputSingleParams {
         address tokenIn;
@@ -441,9 +720,13 @@ interface ISwapRouter is IUniswapV3SwapCallback {
         uint160 sqrtPriceLimitX96;
     }
 
+
+
+
     function exactInputSingle(ExactInputSingleParams calldata params) external payable returns (uint256 amountOut);
 
     struct ExactInputParams {
+
 
         bytes path;
         address recipient;
@@ -452,9 +735,13 @@ interface ISwapRouter is IUniswapV3SwapCallback {
         uint256 amountOutMinimum;
     }
 
+
+
+
     function exactInput(ExactInputParams calldata params) external payable returns (uint256 amountOut);
 
     struct ExactOutputSingleParams {
+
 
         address tokenIn;
         address tokenOut;
@@ -466,9 +753,13 @@ interface ISwapRouter is IUniswapV3SwapCallback {
         uint160 sqrtPriceLimitX96;
     }
 
+
+
+
     function exactOutputSingle(ExactOutputSingleParams calldata params) external payable returns (uint256 amountIn);
 
     struct ExactOutputParams {
+
 
         bytes path;
         address recipient;
@@ -477,30 +768,47 @@ interface ISwapRouter is IUniswapV3SwapCallback {
         uint256 amountInMaximum;
     }
 
+
+
+
     function exactOutput(ExactOutputParams calldata params) external payable returns (uint256 amountIn);
 }
 
 
+
+
 interface IPeripheryImmutableState {
 
+
+
     function factory() external view returns (address);
+
 
     function WETH9() external view returns (address);
 }
 
+
+
 abstract contract PeripheryImmutableState is IPeripheryImmutableState {
 
+
+
     address public immutable override factory;
+
     address public immutable override WETH9;
 
-    constructor(address _factory, address _WETH9) {
-        factory = _factory;
-        WETH9 = _WETH9;
+    constructor(address _factory_addr_t, address _WETH9_addr_t) {
+        factory = _factory_addr_t;
+        WETH9 = _WETH9_addr_t;
     }
 }
 
 
+
+
 abstract contract BlockTimestamp {
+
+
     function _blockTimestamp() internal view virtual returns (uint256) {
         return block.timestamp;
     }
@@ -526,7 +834,7 @@ interface IERC20 {
     /**
      * @dev Returns the amount of tokens owned by `account`.
      */
-    function balanceOf(address account) external view returns (uint256);
+    function balanceOf(address account_addr_t) external view returns (uint256);
 
     /**
      * @dev Moves `amount` tokens from the caller's account to `recipient`.
@@ -535,18 +843,20 @@ interface IERC20 {
      *
      * Emits a {Transfer} event.
 
+
      */
-    function transfer(address recipient, uint256 amount) external returns (bool);
+    function transfer(address recipient_addr_t, uint256 amount) external returns (bool);
 
     /**
      * @dev Returns the remaining number of tokens that `spender` will be
      * allowed to spend on behalf of `owner` through {transferFrom}. This is
 
+
      * zero by default.
      *
      * This value changes when {approve} or {transferFrom} are called.
      */
-    function allowance(address owner, address spender) external view returns (uint256);
+    function allowance(address owner_addr_t, address spender_addr_t) external view returns (uint256);
 
     /**
      * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.
@@ -562,8 +872,9 @@ interface IERC20 {
      *
      * Emits an {Approval} event.
 
+
      */
-    function approve(address spender, uint256 amount) external returns (bool);
+    function approve(address spender_addr_t, uint256 amount) external returns (bool);
 
     /**
      * @dev Moves `amount` tokens from `sender` to `recipient` using the
@@ -574,10 +885,11 @@ interface IERC20 {
      *
      * Emits a {Transfer} event.
 
+
      */
     function transferFrom(
-        address sender,
-        address recipient,
+        address sender_addr_t,
+        address recipient_addr_t,
         uint256 amount
     ) external returns (bool);
 
@@ -593,26 +905,49 @@ interface IERC20 {
      * @dev Emitted when the allowance of a `spender` for an `owner` is set by
      * a call to {approve}. `value` is the new allowance.
 
+
      */
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
+
+
 library LowGasSafeMath {
+
+
+
+
     function add(uint256 x, uint256 y) internal pure returns (uint256 z) {
         require((z = x + y) >= x);
     }
+
+
+
+
 
     function sub(uint256 x, uint256 y) internal pure returns (uint256 z) {
         require((z = x - y) <= x);
     }
 
+
+
+
+
     function mul(uint256 x, uint256 y) internal pure returns (uint256 z) {
         require(x == 0 || (z = x * y) / x == y);
     }
 
+
+
+
+
     function add(int256 x, int256 y) internal pure returns (int256 z) {
         require((z = x + y) >= x == (y >= 0));
     }
+
+
+
+
 
     function sub(int256 x, int256 y) internal pure returns (int256 z) {
         require((z = x - y) <= x == (y >= 0));
@@ -620,62 +955,104 @@ library LowGasSafeMath {
 }
 
 
+
+
 interface IPeripheryPayments {
-    function unwrapWETH9(uint256 amountMinimum, address recipient) external payable;
+
+
+
+
+    function unwrapWETH9(uint256 amountMinimum, address recipient_addr_t) external payable;
+
+
+
 
     function refundETH() external payable;
 
+
+
+
+
+
     function sweepToken(
-        address token,
+        address token_addr_t,
         uint256 amountMinimum,
-        address recipient
+        address recipient_addr_t
     ) external payable;
 }
 
 
+
 interface IWETH9 is IERC20 {
 
+
+
     function deposit() external payable;
+
 
     function withdraw(uint256) external;
 }
 
 library TransferHelper {
 
+
+
+
+
+
+
+
     function safeTransferFrom(
-        address token,
-        address from,
-        address to,
+        address to_addr_tken_addr_t,
+        address from_addr_t,
+        address to_addr_t,
         uint256 value
     ) internal {
 
+
         (bool success, bytes memory data) =
-            token.call(abi.encodeWithSelector(IERC20.transferFrom.selector, from, to, value));
+            to_addr_tken_addr_t.call(abi.encodeWithSelecto_addr_tr(IERC20.transferFrom.selecto_addr_tr, from_addr_t, to_addr_t, value));
         require(success && (data.length == 0 || abi.decode(data, (bool))), 'STF');
     }
 
+
+
+
+
+
     function safeTransfer(
-        address token,
-        address to,
+        address to_addr_tken_addr_t,
+        address to_addr_t,
         uint256 value
     ) internal {
 
-        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(IERC20.transfer.selector, to, value));
+
+        (bool success, bytes memory data) = to_addr_tken_addr_t.call(abi.encodeWithSelecto_addr_tr(IERC20.transfer.selecto_addr_tr, to_addr_t, value));
         require(success && (data.length == 0 || abi.decode(data, (bool))), 'ST');
     }
 
+
+
+
+
+
     function safeApprove(
-        address token,
-        address to,
+        address to_addr_tken_addr_t,
+        address to_addr_t,
         uint256 value
     ) internal {
 
-        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(IERC20.approve.selector, to, value));
+
+        (bool success, bytes memory data) = to_addr_tken_addr_t.call(abi.encodeWithSelecto_addr_tr(IERC20.approve.selecto_addr_tr, to_addr_t, value));
         require(success && (data.length == 0 || abi.decode(data, (bool))), 'SA');
     }
 
-    function safeTransferETH(address to, uint256 value) internal {
-        (bool success, ) = to.call{value: value}(new bytes(0));
+
+
+
+
+    function safeTransferETH(address to_addr_t, uint256 value) internal {
+        (bool success, ) = to_addr_t.call{value: value}(new bytes(0));
         require(success, 'STE');
     }
 }
@@ -685,80 +1062,103 @@ abstract contract PeripheryPayments is IPeripheryPayments, PeripheryImmutableSta
         require(msg.sender == WETH9, 'Not WETH9');
     }
 
-    function unwrapWETH9(uint256 amountMinimum, address recipient) external payable override {
+
+    function unwrapWETH9(uint256 amountMinimum, address recipient_addr_t) external payable override {
         uint256 balanceWETH9 = IWETH9(WETH9).balanceOf(address(this));
         require(balanceWETH9 >= amountMinimum, 'Insufficient WETH9');
 
         if (balanceWETH9 > 0) {
             IWETH9(WETH9).withdraw(balanceWETH9);
-            TransferHelper.safeTransferETH(recipient, balanceWETH9);
+            TransferHelper.safeTransferETH(recipient_addr_t, balanceWETH9);
         }
     }
+
 
     function sweepToken(
-        address token,
+        address token_addr_t,
         uint256 amountMinimum,
-        address recipient
+        address recipient_addr_t
     ) external payable override {
 
-        uint256 balanceToken = IERC20(token).balanceOf(address(this));
-        require(balanceToken >= amountMinimum, 'Insufficient token');
+
+        uint256 balanceToken = IERC20(token_addr_t).balanceOf(address(this));
+        require(balanceToken >= amountMinimum, 'Insufficient token_addr_t');
 
         if (balanceToken > 0) {
-            TransferHelper.safeTransfer(token, recipient, balanceToken);
+            TransferHelper.safeTransfer(token_addr_t, recipient_addr_t, balanceToken);
         }
     }
+
 
     function refundETH() external payable override {
         if (address(this).balance > 0) TransferHelper.safeTransferETH(msg.sender, address(this).balance);
     }
 
+
+
+
+
     function pay(
-        address token,
-        address payer,
-        address recipient,
+        address token_addr_t,
+        address payer_addr_t,
+        address recipient_addr_t,
         uint256 value
     ) internal {
 
-        if (token == WETH9 && address(this).balance >= value) {
+
+        if (token_addr_t == WETH9 && address(this).balance >= value) {
+
             IWETH9(WETH9).deposit{value: value}(); // wrap only what is needed to pay
-            IWETH9(WETH9).transfer(recipient, value);
-        } else if (payer == address(this)) {
-            TransferHelper.safeTransfer(token, recipient, value);
+            IWETH9(WETH9).transfer(recipient_addr_t, value);
+        } else if (payer_addr_t == address(this)) {
+
+            TransferHelper.safeTransfer(token_addr_t, recipient_addr_t, value);
         } else {
-            TransferHelper.safeTransferFrom(token, payer, recipient, value);
+
+            TransferHelper.safeTransferFrom(token_addr_t, payer_addr_t, recipient_addr_t, value);
         }
     }
 }
 
+
+
 interface IPeripheryPaymentsWithFee is IPeripheryPayments {
+
+
+
     function unwrapWETH9WithFee(
         uint256 amountMinimum,
-        address recipient,
+        address recipient_addr_t,
         uint256 feeBips,
-        address feeRecipient
+        address feeRecipient_addr_t
     ) external payable;
 
+
+
+
     function sweepTokenWithFee(
-        address token,
+        address token_addr_t,
         uint256 amountMinimum,
-        address recipient,
+        address recipient_addr_t,
         uint256 feeBips,
-        address feeRecipient
+        address feeRecipient_addr_t
     ) external payable;
 }
 
 
 abstract contract PeripheryPaymentsWithFee is PeripheryPayments, IPeripheryPaymentsWithFee {
 
+
     using LowGasSafeMath for uint256;
+
 
     function unwrapWETH9WithFee(
         uint256 amountMinimum,
-        address recipient,
+        address recipient_addr_t,
         uint256 feeBips,
-        address feeRecipient
+        address feeRecipient_addr_t
     ) public payable override {
+
 
         require(feeBips > 0 && feeBips <= 100);
 
@@ -768,41 +1168,58 @@ abstract contract PeripheryPaymentsWithFee is PeripheryPayments, IPeripheryPayme
         if (balanceWETH9 > 0) {
             IWETH9(WETH9).withdraw(balanceWETH9);
             uint256 feeAmount = balanceWETH9.mul(feeBips) / 10_000;
-            if (feeAmount > 0) TransferHelper.safeTransferETH(feeRecipient, feeAmount);
-            TransferHelper.safeTransferETH(recipient, balanceWETH9 - feeAmount);
+            if (feeAmount > 0) TransferHelper.safeTransferETH(feeRecipient_addr_t, feeAmount);
+            TransferHelper.safeTransferETH(recipient_addr_t, balanceWETH9 - feeAmount);
         }
     }
 
+
     function sweepTokenWithFee(
-        address token,
+        address token_addr_t,
         uint256 amountMinimum,
-        address recipient,
+        address recipient_addr_t,
         uint256 feeBips,
-        address feeRecipient
+        address feeRecipient_addr_t
     ) public payable override {
+
 
         require(feeBips > 0 && feeBips <= 100);
 
-        uint256 balanceToken = IERC20(token).balanceOf(address(this));
-        require(balanceToken >= amountMinimum, 'Insufficient token');
+        uint256 balanceToken = IERC20(token_addr_t).balanceOf(address(this));
+        require(balanceToken >= amountMinimum, 'Insufficient token_addr_t');
 
         if (balanceToken > 0) {
             uint256 feeAmount = balanceToken.mul(feeBips) / 10_000;
-            if (feeAmount > 0) TransferHelper.safeTransfer(token, feeRecipient, feeAmount);
-            TransferHelper.safeTransfer(token, recipient, balanceToken - feeAmount);
+            if (feeAmount > 0) TransferHelper.safeTransfer(token_addr_t, feeRecipient_addr_t, feeAmount);
+            TransferHelper.safeTransfer(token_addr_t, recipient_addr_t, balanceToken - feeAmount);
         }
     }
 }
 
+
+
 interface IMulticall {
+
+
+
+
     function multicall(bytes[] calldata data) external payable returns (bytes[] memory results);
 }
 
 
+
+
 abstract contract Multicall is IMulticall {
 
+
+
     function multicall(bytes[] calldata data) external payable override returns (bytes[] memory results) {
+        results = new bytes[](data.length);
+        for (uint256 i = 0; i < data.length; i++) {
+            (bool success, bytes memory result) = address(this).delegatecall(data[i]);
+
             if (!success) {
+
                 if (result.length < 68) revert();
                 assembly {
                     result := add(result, 0x04)
@@ -841,14 +1258,15 @@ interface IERC20Permit {
      * over the EIP712-formatted function arguments.
      * - the signature must use ``owner``'s current nonce (see {nonces}).
 
+
      *
      * For more information on the signature format, see the
      * https://eips.ethereum.org/EIPS/eip-2612#specification[relevant EIP
      * section].
      */
     function permit(
-        address owner,
-        address spender,
+        address owner_addr_t,
+        address spender_addr_t,
         uint256 value,
         uint256 deadline,
         uint8 v,
@@ -860,32 +1278,55 @@ interface IERC20Permit {
      * @dev Returns the current nonce for `owner`. This value must be
      * included whenever a signature is generated for {permit}.
 
+
      *
      * Every successful call to {permit} increases ``owner``'s nonce by one. This
      * prevents a signature from being used multiple times.
      */
-    function nonces(address owner) external view returns (uint256);
+    function nonces(address owner_addr_t) external view returns (uint256);
 
     /**
      * @dev Returns the domain separator used in the encoding of the signature for {permit}, as defined by {EIP712}.
 
+
      */
+
     function DOMAIN_SEPARATOR() external view returns (bytes32);
 }
 
+
+
 interface ISelfPermit {
 
+
+
+
+
+
+
+
+
+
     function selfPermit(
-        address token,
+        address token_addr_t,
         uint256 value,
         uint256 deadline,
         uint8 v,
         bytes32 r,
         bytes32 s
     ) external payable;
+
+
+
+
+
+
+
+
+
 
     function selfPermitIfNecessary(
-        address token,
+        address token_addr_t,
         uint256 value,
         uint256 deadline,
         uint8 v,
@@ -893,8 +1334,16 @@ interface ISelfPermit {
         bytes32 s
     ) external payable;
 
+
+
+
+
+
+
+
+
     function selfPermitAllowed(
-        address token,
+        address token_addr_t,
         uint256 nonce,
         uint256 expiry,
         uint8 v,
@@ -902,8 +1351,17 @@ interface ISelfPermit {
         bytes32 s
     ) external payable;
 
+
+
+
+
+
+
+
+
+
     function selfPermitAllowedIfNecessary(
-        address token,
+        address token_addr_t,
         uint256 nonce,
         uint256 expiry,
         uint8 v,
@@ -912,11 +1370,24 @@ interface ISelfPermit {
     ) external payable;
 }
 
+
+
 interface IERC20PermitAllowed {
 
+
+
+
+
+
+
+
+
+
+
+
     function permit(
-        address holder,
-        address spender,
+        address holder_addr_t,
+        address spender_addr_t,
         uint256 nonce,
         uint256 expiry,
         bool allowed,
@@ -926,10 +1397,16 @@ interface IERC20PermitAllowed {
     ) external;
 }
 
+
+
+
+
 abstract contract SelfPermit is ISelfPermit {
 
+
+
     function selfPermit(
-        address token,
+        address token_addr_t,
         uint256 value,
         uint256 deadline,
         uint8 v,
@@ -937,11 +1414,13 @@ abstract contract SelfPermit is ISelfPermit {
         bytes32 s
     ) public payable override {
 
-        IERC20Permit(token).permit(msg.sender, address(this), value, deadline, v, r, s);
+
+        IERC20Permit(token_addr_t).permit(msg.sender, address(this), value, deadline, v, r, s);
     }
+
 
     function selfPermitIfNecessary(
-        address token,
+        address token_addr_t,
         uint256 value,
         uint256 deadline,
         uint8 v,
@@ -949,11 +1428,13 @@ abstract contract SelfPermit is ISelfPermit {
         bytes32 s
     ) external payable override {
 
-        if (IERC20(token).allowance(msg.sender, address(this)) < value) selfPermit(token, value, deadline, v, r, s);
+
+        if (IERC20(token_addr_t).allowance(msg.sender, address(this)) < value) selfPermit(token_addr_t, value, deadline, v, r, s);
     }
 
+
     function selfPermitAllowed(
-        address token,
+        address token_addr_t,
         uint256 nonce,
         uint256 expiry,
         uint8 v,
@@ -961,11 +1442,13 @@ abstract contract SelfPermit is ISelfPermit {
         bytes32 s
     ) public payable override {
 
-        IERC20PermitAllowed(token).permit(msg.sender, address(this), nonce, expiry, true, v, r, s);
+
+        IERC20PermitAllowed(token_addr_t).permit(msg.sender, address(this), nonce, expiry, true, v, r, s);
     }
 
+
     function selfPermitAllowedIfNecessary(
-        address token,
+        address token_addr_t,
         uint256 nonce,
         uint256 expiry,
         uint8 v,
@@ -973,8 +1456,9 @@ abstract contract SelfPermit is ISelfPermit {
         bytes32 s
     ) external payable override {
 
-        if (IERC20(token).allowance(msg.sender, address(this)) < type(uint256).max)
-            selfPermitAllowed(token, nonce, expiry, v, r, s);
+
+        if (IERC20(token_addr_t).allowance(msg.sender, address(this)) < type(uint256).max)
+            selfPermitAllowed(token_addr_t, nonce, expiry, v, r, s);
     }
 }
 
@@ -985,6 +1469,7 @@ library BytesLib {
         uint256 _length
     ) internal pure returns (bytes memory) {
 
+
         require(_length + 31 >= _length, 'slice_overflow');
         require(_start + _length >= _start, 'slice_overflow');
         require(_bytes.length >= _start + _length, 'slice_outOfBounds');
@@ -994,14 +1479,30 @@ library BytesLib {
         assembly {
             switch iszero(_length)
                 case 0 {
+
+
                     tempBytes := mload(0x40)
 
+
+
+
+
+
+
+
+
                     let lengthmod := and(_length, 31)
+
+
+
+
 
                     let mc := add(add(tempBytes, lengthmod), mul(0x20, iszero(lengthmod)))
                     let end := add(mc, _length)
 
                     for {
+
+
                         let cc := add(add(add(_bytes, lengthmod), mul(0x20, iszero(lengthmod))), _start)
                     } lt(mc, end) {
                         mc := add(mc, 0x20)
@@ -1012,10 +1513,15 @@ library BytesLib {
 
                     mstore(tempBytes, _length)
 
+
+
                     mstore(0x40, and(add(mc, 31), not(31)))
                 }
+
                 default {
                     tempBytes := mload(0x40)
+
+
                     mstore(tempBytes, 0)
 
                     mstore(0x40, add(tempBytes, 0x20))
@@ -1049,23 +1555,41 @@ library BytesLib {
         return tempUint;
     }
 }
+
 library Path {
     using BytesLib for bytes;
 
+
     uint256 private constant ADDR_SIZE = 20;
+
     uint256 private constant FEE_SIZE = 3;
 
+
     uint256 private constant NEXT_OFFSET = ADDR_SIZE + FEE_SIZE;
+
     uint256 private constant POP_OFFSET = NEXT_OFFSET + ADDR_SIZE;
+
     uint256 private constant MULTIPLE_POOLS_MIN_LENGTH = POP_OFFSET + NEXT_OFFSET;
+
+
+
 
     function hasMultiplePools(bytes memory path) internal pure returns (bool) {
         return path.length >= MULTIPLE_POOLS_MIN_LENGTH;
     }
 
+
+
+
     function numPools(bytes memory path) internal pure returns (uint256) {
+
         return ((path.length - ADDR_SIZE) / NEXT_OFFSET);
     }
+
+
+
+
+
 
     function decodeFirstPool(bytes memory path)
         internal
@@ -1077,22 +1601,31 @@ library Path {
         )
     {
 
+
         tokenA = path.toAddress(0);
         fee = path.toUint24(ADDR_SIZE);
         tokenB = path.toAddress(NEXT_OFFSET);
     }
 
+
+
+
     function getFirstPool(bytes memory path) internal pure returns (bytes memory) {
         return path.slice(0, POP_OFFSET);
     }
+
+
+
 
     function skipToken(bytes memory path) internal pure returns (bytes memory) {
         return path.slice(NEXT_OFFSET, path.length - NEXT_OFFSET);
     }
 }
 
+
 library PoolAddress {
     bytes32 internal constant POOL_INIT_CODE_HASH = 0xe34f199b19b2b4f47f68442619d555527d244f78a3297ea89325f843f87b8b54;
+
 
     struct PoolKey {
         address token0;
@@ -1100,24 +1633,34 @@ library PoolAddress {
         uint24 fee;
     }
 
+
+
+
+
+
     function getPoolKey(
-        address tokenA,
-        address tokenB,
+        address tokenA_addr_t,
+        address tokenB_addr_t,
         uint24 fee
     ) internal pure returns (PoolKey memory) {
 
-        if (tokenA > tokenB) (tokenA, tokenB) = (tokenB, tokenA);
-        return PoolKey({token0: tokenA, token1: tokenB, fee: fee});
+
+        if (tokenA_addr_t > tokenB_addr_t) (tokenA_addr_t, tokenB_addr_t) = (tokenB_addr_t, tokenA_addr_t);
+        return PoolKey({token0: tokenA_addr_t, token1: tokenB_addr_t, fee: fee});
     }
 
-    function computeAddress(address factory, PoolKey memory key) internal pure returns (address pool) {
+
+
+
+
+    function computeAddress(address factory_addr_t, PoolKey memory key) internal pure returns (address pool) {
         require(key.token0 < key.token1);
         pool = address(
             bytes20(
                 keccak256(
                     abi.encodePacked(
                         hex'ff',
-                        factory,
+                        factory_addr_t,
                         keccak256(abi.encode(key.token0, key.token1, key.fee)),
                         POOL_INIT_CODE_HASH
                     )
@@ -1126,27 +1669,42 @@ library PoolAddress {
         );
     }
 }
+
 library CallbackValidation {
+
+
+
+
+
+
     function verifyCallback(
-        address factory,
-        address tokenA,
-        address tokenB,
+        address factory_addr_t,
+        address tokenA_addr_t,
+        address tokenB_addr_t,
         uint24 fee
     ) internal view returns (IUniswapV3Pool pool) {
 
-        return verifyCallback(factory, PoolAddress.getPoolKey(tokenA, tokenB, fee));
+
+        return verifyCallback(factory_addr_t, PoolAddress.getPoolKey(tokenA_addr_t, tokenB_addr_t, fee));
     }
 
-    function verifyCallback(address factory, PoolAddress.PoolKey memory poolKey)
+
+
+
+
+    function verifyCallback(address factory_addr_t, PoolAddress.PoolKey memory poolKey)
         internal
         view
         returns (IUniswapV3Pool pool)
     {
 
-        pool = IUniswapV3Pool(PoolAddress.computeAddress(factory, poolKey));
+
+        pool = IUniswapV3Pool(PoolAddress.computeAddress(factory_addr_t, poolKey));
         require(msg.sender == address(pool));
     }
 }
+
+
 
 contract SwapRouter is
     ISwapRouter,
@@ -1159,19 +1717,24 @@ contract SwapRouter is
     using Path for bytes;
     using SafeCast for uint256;
 
+
+
     uint256 private constant DEFAULT_AMOUNT_IN_CACHED = type(uint256).max;
+
 
     uint256 private amountInCached = DEFAULT_AMOUNT_IN_CACHED;
 
-    constructor(address _factory, address _WETH9) PeripheryImmutableState(_factory, _WETH9) {}
+    constructor(address _factory_addr_t, address _WETH9_addr_t) PeripheryImmutableState(_factory_addr_t, _WETH9_addr_t) {}
+
 
     function getPool(
-        address tokenA,
-        address tokenB,
+        address tokenA_addr_t,
+        address tokenB_addr_t,
         uint24 fee
     ) private view returns (IUniswapV3Pool) {
 
-        return IUniswapV3Pool(PoolAddress.computeAddress(factory, PoolAddress.getPoolKey(tokenA, tokenB, fee)));
+
+        return IUniswapV3Pool(PoolAddress.computeAddress(factory, PoolAddress.getPoolKey(tokenA_addr_t, tokenB_addr_t, fee)));
     }
 
     struct SwapCallbackData {
@@ -1179,11 +1742,13 @@ contract SwapRouter is
         address payer;
     }
 
+
     function uniswapV3SwapCallback(
         int256 amount0Delta,
         int256 amount1Delta,
         bytes calldata _data
     ) external override {
+
 
         require(amount0Delta > 0 || amount1Delta > 0); // swaps entirely within 0-liquidity regions are not supported
         SwapCallbackData memory data = abi.decode(_data, (SwapCallbackData));
@@ -1197,6 +1762,7 @@ contract SwapRouter is
         if (isExactInput) {
             pay(tokenIn, data.payer, msg.sender, amountToPay);
         } else {
+
             if (data.path.hasMultiplePools()) {
                 data.path = data.path.skipToken();
                 exactOutputInternal(amountToPay, msg.sender, 0, data);
@@ -1208,14 +1774,17 @@ contract SwapRouter is
         }
     }
 
+
     function exactInputInternal(
         uint256 amountIn,
-        address recipient,
+        address recipient_addr_t,
         uint160 sqrtPriceLimitX96,
         SwapCallbackData memory data
     ) private returns (uint256 amountOut) {
 
-        if (recipient == address(0)) recipient = address(this);
+
+
+        if (recipient_addr_t == address(0)) recipient_addr_t = address(this);
 
         (address tokenIn, address tokenOut, uint24 fee) = data.path.decodeFirstPool();
 
@@ -1223,7 +1792,7 @@ contract SwapRouter is
 
         (int256 amount0, int256 amount1) =
             getPool(tokenIn, tokenOut, fee).swap(
-                recipient,
+                recipient_addr_t,
                 zeroForOne,
                 amountIn.toInt256(),
                 sqrtPriceLimitX96 == 0
@@ -1235,6 +1804,7 @@ contract SwapRouter is
         return uint256(-(zeroForOne ? amount1 : amount0));
     }
 
+
     function exactInputSingle(ExactInputSingleParams calldata params)
         external
         payable
@@ -1242,6 +1812,7 @@ contract SwapRouter is
         checkDeadline(params.deadline)
         returns (uint256 amountOut)
     {
+
 
         amountOut = exactInputInternal(
             params.amountIn,
@@ -1252,6 +1823,7 @@ contract SwapRouter is
         require(amountOut >= params.amountOutMinimum, 'Too little received');
     }
 
+
     function exactInput(ExactInputParams memory params)
         external
         payable
@@ -1260,10 +1832,12 @@ contract SwapRouter is
         returns (uint256 amountOut)
     {
 
+
         address payer = msg.sender; // msg.sender pays for the first hop
 
         while (true) {
             bool hasMultiplePools = params.path.hasMultiplePools();
+
 
             params.amountIn = exactInputInternal(
                 params.amountIn,
@@ -1274,6 +1848,7 @@ contract SwapRouter is
                     payer: payer
                 })
             );
+
 
             if (hasMultiplePools) {
                 payer = address(this); // at this point, the caller has paid
@@ -1287,14 +1862,17 @@ contract SwapRouter is
         require(amountOut >= params.amountOutMinimum, 'Too little received');
     }
 
+
     function exactOutputInternal(
         uint256 amountOut,
-        address recipient,
+        address recipient_addr_t,
         uint160 sqrtPriceLimitX96,
         SwapCallbackData memory data
     ) private returns (uint256 amountIn) {
 
-        if (recipient == address(0)) recipient = address(this);
+
+
+        if (recipient_addr_t == address(0)) recipient_addr_t = address(this);
 
         (address tokenOut, address tokenIn, uint24 fee) = data.path.decodeFirstPool();
 
@@ -1302,7 +1880,7 @@ contract SwapRouter is
 
         (int256 amount0Delta, int256 amount1Delta) =
             getPool(tokenIn, tokenOut, fee).swap(
-                recipient,
+                recipient_addr_t,
                 zeroForOne,
                 -amountOut.toInt256(),
                 sqrtPriceLimitX96 == 0
@@ -1315,8 +1893,11 @@ contract SwapRouter is
         (amountIn, amountOutReceived) = zeroForOne
             ? (uint256(amount0Delta), uint256(-amount1Delta))
             : (uint256(amount1Delta), uint256(-amount0Delta));
+
+
         if (sqrtPriceLimitX96 == 0) require(amountOutReceived == amountOut);
     }
+
 
     function exactOutputSingle(ExactOutputSingleParams calldata params)
         external
@@ -1326,6 +1907,8 @@ contract SwapRouter is
         returns (uint256 amountIn)
     {
 
+
+
         amountIn = exactOutputInternal(
             params.amountOut,
             params.recipient,
@@ -1334,8 +1917,10 @@ contract SwapRouter is
         );
 
         require(amountIn <= params.amountInMaximum, 'Too much requested');
+
         amountInCached = DEFAULT_AMOUNT_IN_CACHED;
     }
+
 
     function exactOutput(ExactOutputParams calldata params)
         external
@@ -1344,6 +1929,9 @@ contract SwapRouter is
         checkDeadline(params.deadline)
         returns (uint256 amountIn)
     {
+
+
+
 
         exactOutputInternal(
             params.amountOut,
@@ -1358,4 +1946,5 @@ contract SwapRouter is
     }
 
 }
+
 
