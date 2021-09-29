@@ -4,6 +4,7 @@
 #include <libsolutil/IndentedWriter.h>
 #include <libyul/AsmJsonConverter.h>
 #include <regex>
+#include <filesystem>
 #include <tools/yulPhaser/Program.h>
 
 #include "WarpVisitor.hpp"
@@ -198,6 +199,10 @@ void SourceData::markAddressTypesInFunArgs(FunctionDefinition const& _node,
 
 bool SourceData::visit(FunctionDefinition const& _node)
 {
+	if (not _node.isImplemented())
+	{
+		return visitNode(_node);
+	}
 	switch (m_currentPass)
 	{
 	case PassType::AddrTypePass:
@@ -566,40 +571,51 @@ void SourceData::prepareSoliditySource(const char* sol_filepath)
 	std::ostringstream modifiedContractName;
 	modifiedContractName << m_modifiedSolFilepath << ":" << m_mainContract;
 
-	// IRGenerator generator(newCli.options().output.evmVersion,
-	// 					  newCli.options().output.revertStrings,
-	// 					  m_compilerOptimizerSettings,
-	// 					  m_compiler->sourceIndices());
+	IRGenerator generator(newCli.options().output.evmVersion,
+						  newCli.options().output.revertStrings,
+						  m_compilerOptimizerSettings,
+						  m_compiler->sourceIndices());
 
-	// std::string yulIR, yulIROptimized;
-	// auto		otherYulSources = std::map<ContractDefinition const*,
-	// 								   std::string_view const>();
+	std::string yulIR, yulIROptimized;
+	auto		otherYulSources = std::map<ContractDefinition const*,
+									   std::string_view const>();
 
-	// tie(yulIR, yulIROptimized) = generator.run(
-	// 	m_compiler->contractDefinition(modifiedContractName.str()),
-	// 	m_compiler->cborMetadata(modifiedContractName.str()),
-	// 	otherYulSources);
+	tie(yulIR, yulIROptimized) = generator.run(
+		m_compiler->contractDefinition(modifiedContractName.str()),
+		m_compiler->cborMetadata(modifiedContractName.str()),
+		otherYulSources);
 
-	// auto prepass = Prepass(m_src,
-	// 					   m_mainContract,
-	// 					   m_modifiedSolFilepath.c_str(),
-	// 					   m_storageVars_str);
-	// auto yul	 = prepass.cleanYul(yulIROptimized, m_mainContract);
-	// std::cout << yul << std::endl;
-	// // =============== Generate Yul JSON AST ===============
-	// langutil::CharStream ir = langutil::CharStream(yul,
-	// m_modifiedSolFilepath); std::variant<phaser::Program,
-	// langutil::ErrorList> 	maybeProgram = phaser::Program::load(ir);
+	auto prepass = Prepass(m_src,
+						   m_mainContract,
+						   m_modifiedSolFilepath.c_str(),
+						   m_storageVars_str);
+	auto yul	 = prepass.cleanYul(yulIROptimized, m_mainContract);
+	// =============== Generate Yul JSON AST ===============
+	langutil::CharStream ir = langutil::CharStream(yul, m_modifiedSolFilepath);
+	std::variant<phaser::Program, langutil::ErrorList>
+		maybeProgram = phaser::Program::load(ir);
 
-	// if (auto* errorList = std::get_if<langutil::ErrorList>(&maybeProgram))
-	// {
-	// 	langutil::SingletonCharStreamProvider streamProvider{ir};
-	// 	langutil::SourceReferenceFormatter{std::cerr,
-	// 									   streamProvider,
-	// 									   true,
-	// 									   false}
-	// 		.printErrorInformation(*errorList);
-	// 	std::cerr << std::endl;
-	// }
-	// std::cout << get<phaser::Program>(maybeProgram).toJson() << std::endl;
+	if (auto* errorList = std::get_if<langutil::ErrorList>(&maybeProgram))
+	{
+		langutil::SingletonCharStreamProvider streamProvider{ir};
+		langutil::SourceReferenceFormatter{std::cerr,
+										   streamProvider,
+										   true,
+										   false}
+			.printErrorInformation(*errorList);
+		std::cerr << std::endl;
+	}
+	std::cout << get<phaser::Program>(maybeProgram).toJson() << std::endl;
+
+	try 
+	{
+		if (std::filesystem::remove(m_modifiedSolFilepath))
+			return;
+		else
+		std::cout << "file " << m_modifiedSolFilepath << " not found.\n";
+	}
+	catch(const std::filesystem::filesystem_error& err) 
+	{
+		std::cout << "filesystem error: " << err.what() << '\n';
+	}
 }
