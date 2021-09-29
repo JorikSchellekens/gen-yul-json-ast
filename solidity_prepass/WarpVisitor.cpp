@@ -19,6 +19,30 @@ SourceData::SourceData(std::string main_contract,
 	m_modifiedSolFilepath = std::string(filepath.begin(), filepath.end() - 4)
 							+ "_marked.sol";
 }
+void SourceData::removeComments()
+{
+	std::vector<std::string> newSplit;
+	for (size_t i = 0; i < m_srcSplit.size(); i++)
+	{
+		auto lineCopy = m_srcSplit[i];
+		boost::trim(lineCopy);
+		if (lineCopy.length() < 2)
+		{
+			newSplit.emplace_back(m_srcSplit[i]);
+			continue;
+		}
+		else if(boost::starts_with(lineCopy, "//"))
+		{
+			continue;
+		}	
+		else
+		{
+			newSplit.emplace_back(m_srcSplit[i]);
+		}
+	}	
+	this->m_srcSplit = newSplit;
+	print_vector(m_srcSplit);
+}
 
 bool SourceData::hasDynamicArgs(std::string params)
 {
@@ -44,6 +68,7 @@ int SourceData::getSigEnd(int start)
 
 void SourceData::compressSigs()
 {
+	this->removeComments();
 	std::vector<std::string> newSplit;
 	auto					 jump = 1;
 	for (size_t i = 0; i < m_srcSplit.size(); i += jump)
@@ -505,40 +530,40 @@ void SourceData::prepareSoliditySource(const char* sol_filepath)
 	std::ostringstream modifiedContractName;
 	modifiedContractName << m_modifiedSolFilepath << ":" << m_mainContract;
 
-	IRGenerator generator(newCli.options().output.evmVersion,
-						  newCli.options().output.revertStrings,
-						  m_compilerOptimizerSettings,
-						  m_compiler->sourceIndices());
+	// IRGenerator generator(newCli.options().output.evmVersion,
+	// 					  newCli.options().output.revertStrings,
+	// 					  m_compilerOptimizerSettings,
+	// 					  m_compiler->sourceIndices());
 
-	std::string yulIR, yulIROptimized;
-	auto		otherYulSources = std::map<ContractDefinition const*,
-									   std::string_view const>();
+	// std::string yulIR, yulIROptimized;
+	// auto		otherYulSources = std::map<ContractDefinition const*,
+	// 								   std::string_view const>();
 
-	tie(yulIR, yulIROptimized) = generator.run(
-		m_compiler->contractDefinition(modifiedContractName.str()),
-		m_compiler->cborMetadata(modifiedContractName.str()),
-		otherYulSources);
+	// tie(yulIR, yulIROptimized) = generator.run(
+	// 	m_compiler->contractDefinition(modifiedContractName.str()),
+	// 	m_compiler->cborMetadata(modifiedContractName.str()),
+	// 	otherYulSources);
 
-	auto prepass = Prepass(m_src,
-						   m_mainContract,
-						   m_modifiedSolFilepath.c_str(),
-						   m_storageVars_str);
-	auto yul	 = prepass.cleanYul(yulIROptimized, m_mainContract);
-	std::cout << yul << std::endl;
-	// =============== Generate Yul JSON AST ===============
-	langutil::CharStream ir = langutil::CharStream(yul, m_modifiedSolFilepath);
-	std::variant<phaser::Program, langutil::ErrorList>
-		maybeProgram = phaser::Program::load(ir);
+	// auto prepass = Prepass(m_src,
+	// 					   m_mainContract,
+	// 					   m_modifiedSolFilepath.c_str(),
+	// 					   m_storageVars_str);
+	// auto yul	 = prepass.cleanYul(yulIROptimized, m_mainContract);
+	// std::cout << yul << std::endl;
+	// // =============== Generate Yul JSON AST ===============
+	// langutil::CharStream ir = langutil::CharStream(yul, m_modifiedSolFilepath);
+	// std::variant<phaser::Program, langutil::ErrorList>
+	// 	maybeProgram = phaser::Program::load(ir);
 
-	if (auto* errorList = std::get_if<langutil::ErrorList>(&maybeProgram))
-	{
-		langutil::SingletonCharStreamProvider streamProvider{ir};
-		langutil::SourceReferenceFormatter{std::cerr,
-										   streamProvider,
-										   true,
-										   false}
-			.printErrorInformation(*errorList);
-		std::cerr << std::endl;
-	}
-	std::cout << get<phaser::Program>(maybeProgram).toJson() << std::endl;
+	// if (auto* errorList = std::get_if<langutil::ErrorList>(&maybeProgram))
+	// {
+	// 	langutil::SingletonCharStreamProvider streamProvider{ir};
+	// 	langutil::SourceReferenceFormatter{std::cerr,
+	// 									   streamProvider,
+	// 									   true,
+	// 									   false}
+	// 		.printErrorInformation(*errorList);
+	// 	std::cerr << std::endl;
+	// }
+	// std::cout << get<phaser::Program>(maybeProgram).toJson() << std::endl;
 }

@@ -65,6 +65,7 @@ public:
 												  FunctionCall const&		f);
 	FunctionDefinition const*
 		 insideWhichFunction(langutil::SourceLocation const& location);
+	void removeComments();
 	int	 getSigEnd(int start);
 	bool visit(FunctionDefinition const& _node) override;
 	bool visit(FunctionCall const& _node) override;
