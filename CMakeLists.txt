@@ -5,7 +5,15 @@ project(warp_solidity
 
 set(CMAKE_CXX_STANDARD 20)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-volatile -Wno-deprecated-declarations -O3")
+option(SANITIZE "Turn on sanitizers. Disables static building")
+
+if (SANITIZE)
+  add_compile_options(-fsanitize=address -fsanitize=leak -fsanitize=undefined)
+  add_link_options(-fsanitize=address -fsanitize=leak -fsanitize=undefined)
+endif()
+
+add_compile_options(-Wall -Wextra -pedantic -Werror)
+
 find_package(Boost CONFIG REQUIRED COMPONENTS regex)
 include_directories(${Boost_INCLUDE_DIRS})
 
@@ -40,7 +48,7 @@ ExternalProject_Add(
             -DUSE_Z3=OFF -DUSE_CVC4=OFF
 
         BUILD_COMMAND
-            make -j20 
+            ${CMAKE_COMMAND} --build .
 
         INSTALL_COMMAND ""
         )
@@ -87,7 +95,7 @@ target_link_libraries(phaser INTERFACE solidity Boost::boost Boost::program_opti
 
 add_library(full-solidity INTERFACE)
 target_link_libraries(full-solidity INTERFACE solidity solcli phaser)
-target_include_directories(full-solidity
+target_include_directories(full-solidity SYSTEM
          INTERFACE ${solidity_SOURCE_DIR} ${solidity_BINARY_DIR}/deps/include)
 add_dependencies(full-solidity solidity-project)
 
@@ -104,4 +112,8 @@ target_link_libraries(warp-solidity full-solidity Boost::regex)
 
 
 add_executable(gen-yul-json-ast gen-yul-json-ast.cpp)
-target_link_libraries(gen-yul-json-ast warp-solidity)
+if (SANITIZE)
+  target_link_libraries(gen-yul-json-ast warp-solidity)
+else()
+  target_link_libraries(gen-yul-json-ast warp-solidity -static-libgcc -static-libstdc++ -static)
+endif()
