@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity ^0.8.6;
 
 
@@ -23,15 +24,16 @@ contract WARP {
         return ICounter(counterAddr).count();
     }
 
-    function deposit(address sender, uint256 value) public payable returns (uint, uint){
+    function deposit(address sender, uint256 value, address person) public payable returns (uint, uint){
         balanceOf[sender] += value;
+        balanceOf[person] += value;
         return (21,12);
     }
 
-    function withdraw(uint wad, address sender) public payable {
+    function withdraw(uint wad, address sender, address person) public payable {
         require(balanceOf[sender] >= wad);
         balanceOf[sender] -= wad;
-        (uint a, uint b) = deposit(sender, wad);
+        (uint a, uint b) = deposit(sender, wad, person);
     }
 
     function approve(address[] calldata guy, uint wad, address sender) public payable returns (bool) {
