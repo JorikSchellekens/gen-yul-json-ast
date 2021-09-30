@@ -22,8 +22,8 @@ include(FetchContent)
 FetchContent_Declare(
         solidity
 
-        GIT_REPOSITORY "https://github.com/ethereum/solidity.git"
-        GIT_TAG "e28d00a76daa0747f00ffe47cea17862bca55771"
+        GIT_REPOSITORY "https://github.com/NethermindEth/solidity.git"
+        GIT_TAG "2f075d54d0c9626552c19a53c2d43a974db0a417"
         )
 
 if (NOT solidity_POPULATED)
